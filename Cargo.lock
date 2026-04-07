@@ -83,7 +83,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "apu_schedules"
+name = "apu-cli"
 version = "0.1.0"
 dependencies = [
  "chrono",

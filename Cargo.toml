@@ -1,6 +1,6 @@
 [package]
-name = "apu_schedules"
-about = "a simple command-line program to show your APU schedule"
+name = "apu-cli"
+description = "a simple command-line tool to show your APU schedule"
 version = "0.1.0"
 edition = "2024"
 
