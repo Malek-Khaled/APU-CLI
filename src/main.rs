@@ -1,6 +1,6 @@
 use crate::{
     config::{get_main_intake, get_secondary_intake, set_main_intake, set_secondary_intake},
-    service::{get_today_schedule, sync_schedules_locally},
+    service::{check_for_sync, get_today_schedule, sync_schedules_locally},
 };
 use clap::Parser;
 
@@ -30,7 +30,9 @@ struct Cli {
 
 #[tokio::main]
 async fn main() {
-    // sync_schedules_locally().await;
+    if check_for_sync() {
+        sync_schedules_locally().await;
+    }
     let args = Cli::parse();
     let mut writing_message = String::from("Added in the config file.");
 

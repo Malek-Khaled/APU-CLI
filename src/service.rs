@@ -1,7 +1,7 @@
 use chrono::{Datelike, Local};
 use std::{collections::HashMap, fs::File};
 
-use crate::config::get_intake_dir;
+use crate::config::{get_intake_dir, get_main_intake};
 use reqwest::Error;
 
 async fn get_schedules() -> Result<Vec<serde_json::Value>, Error> {
@@ -79,23 +79,55 @@ fn read_schedules(intake: &str, group: &str) -> Vec<HashMap<String, String>> {
     }
     group_schedule
 }
+fn get_today() -> String {
+    let today_num = Local::now().day();
+    if today_num < 10 {
+        format!("0{}", today_num)
+    } else {
+        today_num.to_string()
+    }
+}
+fn get_month() -> String {
+    let month_num = Local::now().month();
+    if month_num < 10 {
+        format!("0{}", month_num)
+    } else {
+        month_num.to_string()
+    }
+}
 
 pub fn get_today_schedule(intake: &str, group: &str) -> Vec<HashMap<String, String>> {
-    let today_num = Local::now().day();
-    let mut today = String::new();
-    if today_num < 10 {
-        today = format!("0{}", today_num);
-    } else {
-        today = today_num.to_string();
-    }
+    let today = get_today();
+    let month = get_month();
     let mut today_schedule = Vec::new();
     let intake_schedule = read_schedules(intake, group);
     for schedule in intake_schedule {
         let date: Vec<&str> = schedule.get("DATESTAMP_ISO").unwrap().split("-").collect();
         let class_day = date[2];
-        if today == class_day {
+        let class_month = date[1];
+        if today.eq(&class_day) && class_month.eq(&month) {
             today_schedule.push(schedule);
         }
     }
     today_schedule
+}
+
+pub fn check_for_sync() -> bool {
+    let today = get_today();
+    let month = get_month();
+    let intake = get_main_intake();
+    let schedules = read_schedules(&intake.code.unwrap(), &intake.group.unwrap());
+    let last_day_date: Vec<&str> = schedules
+        .last()
+        .unwrap()
+        .get("DATESTAMP_ISO")
+        .unwrap()
+        .split("-")
+        .collect();
+    let last_day = last_day_date[2].to_string();
+    let last_day_month = last_day_date[1].to_string();
+    if last_day.eq(&today) && last_day_month.eq(&month) {
+        return true;
+    }
+    false
 }
