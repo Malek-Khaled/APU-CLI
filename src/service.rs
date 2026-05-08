@@ -126,7 +126,7 @@ pub fn check_for_sync() -> bool {
         .collect();
     let last_day = last_day_date[2].to_string();
     let last_day_month = last_day_date[1].to_string();
-    if last_day.eq(&today) && last_day_month.eq(&month) {
+    if last_day_month < month || last_day < today {
         return true;
     }
     false
